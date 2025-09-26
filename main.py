@@ -20,14 +20,14 @@ def get_scanview(date_range: DateRange):
     scanview_payments = scanview_scraper.get_payment_data()
     scanview_orders = [
         ScanviewPayment(order=payment_order)
-        for payment_order in scanview_payments.itertuples(index=False)
+        for _, payment_order in scanview_payments.iterrows()
     ]
     print(f"Fetched {len(scanview_orders)} Scanview orders")
 
     # Fetch parking logs
     logs = scanview_scraper.get_parking_logs()
     scanview_logs = [
-        ScanviewLog(log=scanview_log) for scanview_log in logs.itertuples(index=False)
+        ScanviewLog(log=scanview_log) for _, scanview_log in logs.iterrows()
     ]
     print(f"Fetched {len(scanview_logs)} Scanview logs")
     return scanview_orders, scanview_logs
@@ -47,9 +47,7 @@ def get_solvision(date_range: DateRange):
     total_row = data[data["cardFirm"] == "Total"]
     data.drop(total_row.index, inplace=True)
 
-    solvision_data = [
-        SolvisionOrder(order=order) for order in data.itertuples(index=False)
-    ]
+    solvision_data = [SolvisionOrder(order=order) for _, order in data.iterrows()]
     print(f"Fetched {len(solvision_data)} Solvision orders")
 
     return solvision_data
@@ -62,9 +60,7 @@ def get_giantleap(date_range: DateRange):
     data_fetcher = GiantleapScraper(creds, date_range, headless=True)
     data = data_fetcher.fetch()
 
-    giantleap_data = [
-        GiantleapOrder(order=order) for order in data.itertuples(index=False)
-    ]
+    giantleap_data = [GiantleapOrder(order=order) for _, order in data.iterrows()]
     print(f"Fetched {len(giantleap_data)} Giantleap orders")
 
     return giantleap_data
