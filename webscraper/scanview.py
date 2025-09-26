@@ -23,7 +23,7 @@ class FetchPayload:
     length: int = 4000
     draw: int = 1
     columns: list[str] = field(
-        default_factory=[
+        default_factory=lambda: [
             "OrderDate",
             "Customer",
             "Name",
