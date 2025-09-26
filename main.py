@@ -1,12 +1,12 @@
 from datetime import datetime
 import os
 from dotenv import load_dotenv
-import pandas as pd
 import database.operations as db_ops
 from webscraper.giantleap import GiantleapScraper
-from webscraper.scanview import Credentials, DateRange, ScanviewScraper
+from webscraper.scanview import ScanviewScraper
 from database.models import GiantleapOrder, ScanviewPayment, ScanviewLog, SolvisionOrder
 from webscraper.solvision import SolvisionScraper
+from webscraper.utils import Credentials, DateRange
 
 
 def get_scanview(date_range: DateRange):

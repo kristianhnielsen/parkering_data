@@ -1,59 +1,19 @@
 import os
 from dotenv import load_dotenv
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
 import time
 import requests
 import pandas as pd
-import logging
 from urllib.parse import urljoin
 from dotenv import load_dotenv
 import os
-import numpy as np
 import json
 
-
-@dataclass
-class Credentials:
-    username: str
-    password: str
-
-
-class DriverManager:
-    @staticmethod
-    def create(
-        headless: bool = False, start_maximized: bool = True
-    ) -> webdriver.Chrome:
-        options = Options()
-        if start_maximized:
-            options.add_argument("--start-maximized")
-        if headless:
-            options.add_argument("--headless")
-        service = Service()
-        return webdriver.Chrome(service=service, options=options)
-
-
-@dataclass
-class DateRange:
-    start: datetime
-    end: datetime
-
-    def days(self) -> int:
-        return (self.end - self.start).days
-
-    def split(self, interval_days: int) -> list["DateRange"]:
-        ranges = []
-        current_start = self.start
-        while current_start < self.end:
-            current_end = min(current_start + timedelta(days=interval_days), self.end)
-            ranges.append(DateRange(current_start, current_end))
-            current_start = current_end + timedelta(days=1)
-        return ranges
+from webscraper.utils import Credentials, DateRange, DriverManager
 
 
 @dataclass
@@ -73,7 +33,7 @@ class FetchPayload:
         ]
     )
 
-    def _dates_to_time_range(self) -> dict:
+    def _dates_to_time_range(self):
         sample_time_range = (
             '{"variant":"TIME_RANGE_FROM_TO","from":"2025-09-16","to":"2025-09-18"}'
         )
@@ -81,10 +41,8 @@ class FetchPayload:
         time_range["from"] = self.date_from.strftime("%Y-%m-%d")
         time_range["to"] = self.date_to.strftime("%Y-%m-%d")
         time_range_str = json.dumps(time_range)
-        # time_range_str = time_range_str.replace('"', '\\"')
 
         return time_range_str
-        # return time_range_str
 
     def to_dict(self) -> dict:
         self.parameters[0]["valueObject"] = self._dates_to_time_range()

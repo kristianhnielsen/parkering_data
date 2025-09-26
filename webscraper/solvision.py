@@ -10,49 +10,11 @@ from selenium.webdriver.chrome.options import Options
 import time
 import requests
 import pandas as pd
-import logging
 from urllib.parse import urljoin
 from dotenv import load_dotenv
 import os
 import numpy as np
-
-
-@dataclass
-class Credentials:
-    username: str
-    password: str
-
-
-class DriverManager:
-    @staticmethod
-    def create(
-        headless: bool = False, start_maximized: bool = True
-    ) -> webdriver.Chrome:
-        options = Options()
-        if start_maximized:
-            options.add_argument("--start-maximized")
-        if headless:
-            options.add_argument("--headless")
-        service = Service()
-        return webdriver.Chrome(service=service, options=options)
-
-
-@dataclass
-class DateRange:
-    start: datetime
-    end: datetime
-
-    def days(self) -> int:
-        return (self.end - self.start).days
-
-    def split(self, interval_days: int) -> list["DateRange"]:
-        ranges = []
-        current_start = self.start
-        while current_start < self.end:
-            current_end = min(current_start + timedelta(days=interval_days), self.end)
-            ranges.append(DateRange(current_start, current_end))
-            current_start = current_end + timedelta(days=1)
-        return ranges
+from webscraper.utils import Credentials, DateRange, DriverManager
 
 
 @dataclass
