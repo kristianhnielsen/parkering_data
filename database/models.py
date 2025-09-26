@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 import pandas as pd
 from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column
+from database.utils import safe_na_datetime
 
 
 class Base(DeclarativeBase):
@@ -63,21 +64,17 @@ class ScanviewLog(Base):
     handle_by_type: Mapped[str]
     handle_by: Mapped[str]
 
-    def _safe_na(self, val):
-        """SQLAlchemy cannot process pd.NaT as None.
-        Returns None when the value is pd.NaT (or pd.Na)"""
-        return None if pd.isna(val) else val
-
     def __init__(self, log: pd.Series):
         super().__init__()
+        log = safe_na_datetime(log)
         self.area_name = log.AreaName
         self.area_id = int(log.AreaNo)
         self.created_date_utc = log.CreatedDateUtc
-        self.end_date_utc = self._safe_na(log.EndDateUtc)
+        self.end_date_utc = log.EndDateUtc
         self.price = log.Price
         self.license_plate = log.LicensePlate
-        self.payment_start_utc = self._safe_na(log.PaymentStartUtc)
-        self.payment_end_utc = self._safe_na(log.PaymentEndUtc)
+        self.payment_start_utc = log.PaymentStartUtc
+        self.payment_end_utc = log.PaymentEndUtc
         self.handle = log.Handle
         self.handle_by_type = log.HandleByType
         self.handle_by = log.HandleBy
@@ -103,18 +100,14 @@ class SolvisionOrder(Base):
     discount_code: Mapped[str] = mapped_column(nullable=True)
     discount_type: Mapped[str] = mapped_column(nullable=True)
 
-    def _safe_na(self, val):
-        """SQLAlchemy cannot process pd.NaT as None.
-        Returns None when the value is pd.NaT (or pd.Na)"""
-        return None if pd.isna(val) else val
-
     def __init__(self, order: pd.Series):
         super().__init__()
+        order = safe_na_datetime(order)
         self.location_id = order.id
         self.location = order.deviceName
         self.license_plate = order.plate
-        self.start_date = self._safe_na(order.start)
-        self.end_date = self._safe_na(order.end)
+        self.start_date = order.start
+        self.end_date = order.end
         self.price = order.amount
         self.fee = order.fee
         self.parking_time = order.parkingTime
