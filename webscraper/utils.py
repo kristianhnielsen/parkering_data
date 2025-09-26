@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+import os
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from dotenv import load_dotenv
 
 
 @dataclass
@@ -25,11 +27,11 @@ class DateRange:
 
 @dataclass
 class Credentials:
-    username: str | None
-    password: str | None
+    username: str
+    password: str
 
-    def __is_valid(self, credential: str | None):
-        return isinstance(credential, str) and credential.strip() != ""
+    def __is_valid(self, credential: str):
+        return credential.strip() != "" and credential != ""
 
     def __post_init__(self) -> None:
         if not self.__is_valid(self.username) or not self.__is_valid(self.password):
@@ -50,3 +52,15 @@ class DriverManager:
             options.add_argument("--headless")
         service = Service()
         return webdriver.Chrome(service=service, options=options)
+
+
+class EnvManager:
+    @staticmethod
+    def get(env_name: str):
+        load_dotenv()
+        env = os.getenv(env_name)
+        if not env:
+            raise EnvironmentError(
+                f"Could not find the environment variable {env_name}. Check your .env file."
+            )
+        return env
