@@ -225,9 +225,24 @@ class DataFetcher:
         return df
 
 
+class GiantleapScraper:
+    def __init__(
+        self, creds: Credentials, date_range: DateRange, headless: bool = False
+    ):
+        self.driver = DriverManager.create(headless=headless)
+        self.session = GiantleapSession(creds, self.driver)
+        self.date_range = date_range
+
+    def fetch(self) -> pd.DataFrame:
+        data = DataFetcher(self.session, self.date_range).fetch()
+        return data
+
+
 if __name__ == "__main__":
     load_dotenv()
-
+    pd.options.display.max_rows = None
+    pd.options.display.max_columns = None
+    pd.options.display.max_colwidth = None
     creds = Credentials(
         username=os.getenv("GIANTLEAP_USER"), password=os.getenv("GIANTLEAP_PASSWORD")
     )

@@ -1,12 +1,12 @@
 from datetime import datetime
 import os
-import time
 from dotenv import load_dotenv
 import pandas as pd
 import database.operations as db_ops
+from webscraper.giantleap import GiantleapScraper
 from webscraper.scanview import Credentials, DateRange, ScanviewScraper
-from database.models import ScanviewPayment, ScanviewLog, SolvisionOrder
-from webscraper.solvision import DataFetcher, DriverManager, SolvisionSession
+from database.models import GiantleapOrder, ScanviewPayment, ScanviewLog, SolvisionOrder
+from webscraper.solvision import SolvisionScraper
 
 
 def get_scanview(date_range: DateRange):
@@ -37,12 +37,11 @@ def get_solvision(date_range: DateRange):
     creds = Credentials(
         username=os.getenv("SOLVISION_USER"), password=os.getenv("SOLVISION_PASSWORD")
     )
-    solvision = SolvisionSession(creds, DriverManager.create(headless=True))
 
-    time.sleep(5)  # Wait for login to complete
+    # time.sleep(5)  # Wait for login to complete
 
-    data_fetcher = DataFetcher(solvision, date_range)
-    data = data_fetcher.fetch()
+    data_scraper = SolvisionScraper(creds, date_range, headless=True)
+    data = data_scraper.fetch()
 
     # Remove summary row
     total_row = data[data["cardFirm"] == "Total"]
@@ -56,6 +55,21 @@ def get_solvision(date_range: DateRange):
     return solvision_data
 
 
+def get_giantleap(date_range: DateRange):
+    creds = Credentials(
+        username=os.getenv("GIANTLEAP_USER"), password=os.getenv("GIANTLEAP_PASSWORD")
+    )
+    data_fetcher = GiantleapScraper(creds, date_range, headless=True)
+    data = data_fetcher.fetch()
+
+    giantleap_data = [
+        GiantleapOrder(order=order) for order in data.itertuples(index=False)
+    ]
+    print(f"Fetched {len(giantleap_data)} Giantleap orders")
+
+    return giantleap_data
+
+
 def main():
     load_dotenv()
     tables = []
@@ -64,14 +78,18 @@ def main():
     pd.options.display.max_columns = None
     pd.options.display.max_colwidth = None
 
-    # Get Scanview data
-    scanview_orders, scanview_logs = get_scanview(date_range)
-    tables.append(scanview_orders)
-    tables.append(scanview_logs)
+    # # Get Scanview data
+    # scanview_orders, scanview_logs = get_scanview(date_range)
+    # tables.append(scanview_orders)
+    # tables.append(scanview_logs)
 
     # Get Solvision data
     solvision_orders = get_solvision(date_range)
     tables.append(solvision_orders)
+
+    # # Get Giantleap data
+    # giantleap_orders = get_giantleap(date_range)
+    # tables.append(giantleap_orders)
 
     # Store data in the database
     with db_ops.get_db() as db:

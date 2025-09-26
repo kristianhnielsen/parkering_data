@@ -240,6 +240,19 @@ class DataFetcher:
         return data_df
 
 
+class SolvisionScraper:
+    def __init__(
+        self, creds: Credentials, date_range: DateRange, headless: bool = False
+    ):
+        self.driver = DriverManager.create(headless=headless)
+        self.session = SolvisionSession(creds, self.driver)
+        self.date_range = date_range
+
+    def fetch(self) -> pd.DataFrame:
+        data = DataFetcher(self.session, self.date_range).fetch()
+        return data
+
+
 if __name__ == "__main__":
     load_dotenv()
     base_url = "https://portal.solvision.dk/"
