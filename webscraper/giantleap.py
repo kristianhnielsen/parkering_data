@@ -141,8 +141,8 @@ class DataFetcher:
         local_storage = self._get_local_storage()
         # The key for the token may vary, so you might need to inspect the
         # browser's Local Storage or network traffic to find the correct key.
-        x_token = local_storage.get("accessToken_admin", "")
-        x_token: dict = json.loads(x_token)
+        x_token_raw: str = local_storage.get("accessToken_admin", "")
+        x_token: dict = json.loads(x_token_raw)
         return x_token.get("value", "")
 
     def fetch(self) -> pd.DataFrame:
