@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 import os
 import json
 
-from webscraper.utils import Credentials, DateRange, DriverManager
+from webscraper.utils import Credentials, DateRange, DriverManager, EnvManager
 
 
 @dataclass
@@ -202,7 +202,8 @@ if __name__ == "__main__":
     pd.options.display.max_columns = None
     pd.options.display.max_colwidth = None
     creds = Credentials(
-        username=os.getenv("GIANTLEAP_USER"), password=os.getenv("GIANTLEAP_PASSWORD")
+        username=EnvManager.get("GIANTLEAP_USER"),
+        password=EnvManager.get("GIANTLEAP_PASSWORD"),
     )
     giantleap = GiantleapSession(creds, DriverManager.create(headless=True))
 

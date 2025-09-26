@@ -6,13 +6,14 @@ from webscraper.giantleap import GiantleapScraper
 from webscraper.scanview import ScanviewScraper
 from database.models import GiantleapOrder, ScanviewPayment, ScanviewLog, SolvisionOrder
 from webscraper.solvision import SolvisionScraper
-from webscraper.utils import Credentials, DateRange
+from webscraper.utils import Credentials, DateRange, EnvManager
 
 
 def get_scanview(date_range: DateRange):
     # Initialize credentials and date range
     creds = Credentials(
-        username=os.getenv("SCANVIEW_USER"), password=os.getenv("SCANVIEW_PASSWORD")
+        username=EnvManager.get("SCANVIEW_USER"),
+        password=EnvManager.get("SCANVIEW_PASSWORD"),
     )
     scanview_scraper = ScanviewScraper(creds, date_range, headless=True)
 
@@ -35,7 +36,8 @@ def get_scanview(date_range: DateRange):
 
 def get_solvision(date_range: DateRange):
     creds = Credentials(
-        username=os.getenv("SOLVISION_USER"), password=os.getenv("SOLVISION_PASSWORD")
+        username=EnvManager.get("SOLVISION_USER"),
+        password=EnvManager.get("SOLVISION_PASSWORD"),
     )
 
     # time.sleep(5)  # Wait for login to complete
@@ -55,7 +57,8 @@ def get_solvision(date_range: DateRange):
 
 def get_giantleap(date_range: DateRange):
     creds = Credentials(
-        username=os.getenv("GIANTLEAP_USER"), password=os.getenv("GIANTLEAP_PASSWORD")
+        username=EnvManager.get("GIANTLEAP_USER"),
+        password=EnvManager.get("GIANTLEAP_PASSWORD"),
     )
     data_fetcher = GiantleapScraper(creds, date_range, headless=True)
     data = data_fetcher.fetch()

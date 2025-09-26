@@ -14,7 +14,7 @@ from urllib.parse import urljoin
 from dotenv import load_dotenv
 import os
 import numpy as np
-from webscraper.utils import Credentials, DateRange, DriverManager
+from webscraper.utils import Credentials, DateRange, DriverManager, EnvManager
 
 
 @dataclass
@@ -220,7 +220,8 @@ if __name__ == "__main__":
     base_url = "https://portal.solvision.dk/"
 
     creds = Credentials(
-        username=os.getenv("SOLVISION_USER"), password=os.getenv("SOLVISION_PASSWORD")
+        username=EnvManager.get("SOLVISION_USER"),
+        password=EnvManager.get("SOLVISION_PASSWORD"),
     )
     solvision = SolvisionSession(creds, DriverManager.create(headless=False))
 

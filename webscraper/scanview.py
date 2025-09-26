@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 import os
 import numpy as np
 
-from webscraper.utils import Credentials, DateRange, DriverManager
+from webscraper.utils import Credentials, DateRange, DriverManager, EnvManager
 
 
 @dataclass
@@ -251,7 +251,8 @@ if __name__ == "__main__":
     load_dotenv()
 
     creds = Credentials(
-        username=os.getenv("SCANVIEW_USER"), password=os.getenv("SCANVIEW_PASSWORD")
+        username=EnvManager.get("SCANVIEW_USER"),
+        password=EnvManager.get("SCANVIEW_PASSWORD"),
     )
     date_range = DateRange(start=datetime(2025, 5, 1), end=datetime.now())
     scraper = ScanviewScraper(creds, date_range, headless=False)
