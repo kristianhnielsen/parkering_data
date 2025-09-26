@@ -19,7 +19,7 @@ class FetchPayload:
     date_to: datetime
     operatorId: str = "vejle"
     pageIndex: int = 0
-    pageSize: int = 1000
+    pageSize: int = 100_000_000
 
     parameters: list[dict] = field(
         default_factory=lambda: [
