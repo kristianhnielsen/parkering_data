@@ -175,7 +175,6 @@ class DataFetcher:
         )
 
         df["payer"] = df["payer"].str.replace("  ", " ").str.strip()
-        df["payer_msisdn"] = df["payer_msisdn"].astype(int)
 
         return df
 

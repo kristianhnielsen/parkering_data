@@ -129,7 +129,7 @@ class GiantleapOrder(Base):
     report_time: Mapped[datetime]
     description: Mapped[str]
     zone: Mapped[str]
-    payer_phone: Mapped[int]
+    payer_phone: Mapped[str]
     payer_name: Mapped[str]
     amount: Mapped[float]
     vat: Mapped[float]
