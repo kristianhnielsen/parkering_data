@@ -97,19 +97,24 @@ class SolvisionOrder(Base):
     parking_time: Mapped[int]
     payment_time: Mapped[datetime]
     license_plate: Mapped[str]
-    start_date: Mapped[datetime]
-    end_date: Mapped[datetime]
+    start_date: Mapped[Optional[datetime]] = mapped_column(nullable=True)
+    end_date: Mapped[Optional[datetime]] = mapped_column(nullable=True)
     rate_type: Mapped[str] = mapped_column(nullable=True)
     discount_code: Mapped[str] = mapped_column(nullable=True)
     discount_type: Mapped[str] = mapped_column(nullable=True)
+
+    def _safe_na(self, val):
+        """SQLAlchemy cannot process pd.NaT as None.
+        Returns None when the value is pd.NaT (or pd.Na)"""
+        return None if pd.isna(val) else val
 
     def __init__(self, order: pd.Series):
         super().__init__()
         self.location_id = order.id
         self.location = order.deviceName
         self.license_plate = order.plate
-        self.start_date = order.start
-        self.end_date = order.end
+        self.start_date = self._safe_na(order.start)
+        self.end_date = self._safe_na(order.end)
         self.price = order.amount
         self.fee = order.fee
         self.parking_time = order.parkingTime
