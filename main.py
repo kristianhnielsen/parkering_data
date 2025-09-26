@@ -75,21 +75,18 @@ def main():
     tables = []
     date_range = DateRange(start=datetime(2025, 9, 9), end=datetime.now())
 
-    pd.options.display.max_columns = None
-    pd.options.display.max_colwidth = None
-
-    # # Get Scanview data
-    # scanview_orders, scanview_logs = get_scanview(date_range)
-    # tables.append(scanview_orders)
-    # tables.append(scanview_logs)
+    # Get Scanview data
+    scanview_orders, scanview_logs = get_scanview(date_range)
+    tables.append(scanview_orders)
+    tables.append(scanview_logs)
 
     # Get Solvision data
     solvision_orders = get_solvision(date_range)
     tables.append(solvision_orders)
 
-    # # Get Giantleap data
-    # giantleap_orders = get_giantleap(date_range)
-    # tables.append(giantleap_orders)
+    # Get Giantleap data
+    giantleap_orders = get_giantleap(date_range)
+    tables.append(giantleap_orders)
 
     # Store data in the database
     with db_ops.get_db() as db:
