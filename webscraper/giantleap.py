@@ -20,7 +20,7 @@ from webscraper.utils import Credentials, DateRange, DriverManager, EnvManager
 class FetchPayload:
     date_from: datetime
     date_to: datetime
-    operatorId: int = "vejle"
+    operatorId: str = "vejle"
     pageIndex: int = 0
     pageSize: int = 1000
 
