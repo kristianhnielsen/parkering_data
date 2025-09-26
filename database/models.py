@@ -121,3 +121,34 @@ class SolvisionOrder(Base):
         self.rate_type = order.rateType
         self.discount_code = order.discountCode
         self.discount_type = order.discountType
+
+
+class GiantleapOrder(Base):
+    __tablename__ = "giantleap_order"
+
+    id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+    report_time: Mapped[datetime]
+    description: Mapped[str]
+    zone: Mapped[str]
+    payer_phone: Mapped[int]
+    payer_name: Mapped[str]
+    amount: Mapped[float]
+    vat: Mapped[float]
+    payment_method: Mapped[str]
+    payment_card: Mapped[str]
+    payment_transaction: Mapped[int]
+    note: Mapped[str] = mapped_column(nullable=True)
+
+    def __init__(self, order: pd.Series):
+        super().__init__()
+        self.report_time = order.report_time
+        self.description = order.item_description
+        self.zone = order.zone
+        self.payer_phone = order.payer_msisdn
+        self.payer_name = order.payer
+        self.amount = order.amount
+        self.vat = order.vat
+        self.payment_method = order.payment_method
+        self.payment_card = order.payment_card
+        self.payment_transaction = order.payment_transaction
+        self.note = order.note
