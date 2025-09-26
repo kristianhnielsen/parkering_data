@@ -1,19 +1,14 @@
-import os
 from dotenv import load_dotenv
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
 import time
 import requests
 import pandas as pd
 from urllib.parse import urljoin
 from dotenv import load_dotenv
-import os
-import numpy as np
 from webscraper.utils import Credentials, DateRange, DriverManager, EnvManager
 
 

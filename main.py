@@ -72,7 +72,7 @@ def get_giantleap(date_range: DateRange):
 def main():
     load_dotenv()
     tables = []
-    date_range = DateRange(start=datetime(2025, 9, 9), end=datetime.now())
+    date_range = DateRange(start=datetime(2025, 9, 20), end=datetime.now())
 
     # Get Scanview data
     scanview_orders, scanview_logs = get_scanview(date_range)

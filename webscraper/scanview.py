@@ -9,9 +9,7 @@ import pandas as pd
 import logging
 from urllib.parse import urljoin
 from dotenv import load_dotenv
-import os
 import numpy as np
-
 from webscraper.utils import Credentials, DateRange, DriverManager, EnvManager
 
 

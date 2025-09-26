@@ -1,4 +1,3 @@
-import os
 from dotenv import load_dotenv
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -10,9 +9,7 @@ import requests
 import pandas as pd
 from urllib.parse import urljoin
 from dotenv import load_dotenv
-import os
 import json
-
 from webscraper.utils import Credentials, DateRange, DriverManager, EnvManager
 
 
