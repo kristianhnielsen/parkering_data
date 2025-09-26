@@ -29,7 +29,7 @@ class ScanviewPayment(Base):
     auto_renew: Mapped[bool]
     price: Mapped[int]
 
-    def __init__(self, order: pd.DataFrame):
+    def __init__(self, order: pd.Series):
         super().__init__()
         self.date = order.OrderDate
         self.type = order.Name
@@ -69,7 +69,7 @@ class ScanviewLog(Base):
         Returns None when the value is pd.NaT (or pd.Na)"""
         return None if pd.isna(val) else val
 
-    def __init__(self, log: pd.DataFrame):
+    def __init__(self, log: pd.Series):
         super().__init__()
         self.area_name = log.AreaName
         self.area_id = int(log.AreaNo)
@@ -104,7 +104,7 @@ class SolvisionOrder(Base):
     discount_code: Mapped[str] = mapped_column(nullable=True)
     discount_type: Mapped[str] = mapped_column(nullable=True)
 
-    def __init__(self, order: pd.DataFrame):
+    def __init__(self, order: pd.Series):
         super().__init__()
         self.location_id = order.id
         self.location = order.deviceName
