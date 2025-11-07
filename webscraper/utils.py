@@ -21,7 +21,7 @@ class DateRange:
         while current_start < self.end:
             current_end = min(current_start + timedelta(days=interval_days), self.end)
             ranges.append(DateRange(current_start, current_end))
-            current_start = current_end + timedelta(days=1)
+            current_start = current_end
         return ranges
 
 
