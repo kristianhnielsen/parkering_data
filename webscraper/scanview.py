@@ -11,6 +11,8 @@ from urllib.parse import urljoin
 from dotenv import load_dotenv
 import numpy as np
 from webscraper.utils import Credentials, DateRange, DriverManager, EnvManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 @dataclass
@@ -68,12 +70,24 @@ class ScanviewSession:
     def login(self) -> None:
         # implement login via Selenium (navigate, fill creds, submit)
         """Log in to the ScanviewPay admin panel."""
+        # Navigate should already have landed on the login page when called.
         username_input = self.driver.find_element(By.ID, "Email")
         password_input = self.driver.find_element(By.ID, "Password")
+        username_input.clear()
         username_input.send_keys(self.creds.username)
+        password_input.clear()
         password_input.send_keys(self.creds.password)
+        # capture current url so we can detect navigation after submit
+        before_url = self.driver.current_url
         password_input.send_keys(Keys.RETURN)
-        time.sleep(2)  # Wait for login to complete
+
+        # Wait for navigation or for cookies to be populated (login completed)
+        try:
+            WebDriverWait(self.driver, 15).until(lambda d: d.current_url != before_url)
+        except Exception:
+            # Fallback: wait a short while and continue; this makes the login
+            # more resilient when the site takes longer to redirect.
+            time.sleep(5)
 
     def _get_cookies(self):
         return self.driver.get_cookies()
@@ -137,41 +151,66 @@ class BaseDataFetcher:
         """Fetch the data for /Order"""
 
         data_df = pd.DataFrame()
-        # don't split the requests into smaller date ranges,
-        # if the total number of records can fit in a single request
-        if self.total_records() <= FetchPayload.length:
-            payload = FetchPayload(
-                date_from=self.date_range.start,
-                date_to=self.date_range.end,
-                columns=self.columns,
-            ).to_dict()
+        # Build a payload instance to access the configured request length
+        full_payload = FetchPayload(
+            date_from=self.date_range.start,
+            date_to=self.date_range.end,
+            columns=self.columns,
+        )
 
-            response = self.session.session.post(
-                url=self.url,
-                data=payload,
-                headers=self.headers,
-            )
-            data = response.json().get("aaData", [])
-            data_df = pd.DataFrame(data)
+        try:
+            total = self.total_records()
+        except Exception as exc:  # pragma: no cover - runtime/network
+            logging.exception("Failed to determine total records: %s", exc)
+            total = 0
 
-        # If cannot fetch all data in one request,
-        # divide it into ranges of interval_days.
-        # interval_days = 10 should never exceed the max payload length of 4000
-        for dr in self.date_range.split(interval_days=10):
-            payload = FetchPayload(
-                date_from=dr.start,
-                date_to=dr.end,
-                columns=self.columns,
-            ).to_dict()
-            resp = self.session.session.post(
-                url=self.url,
-                data=payload,
-                headers=self.headers,
-            )
-            date_range_data = resp.json().get("aaData", [])
-            date_range_data = pd.DataFrame(date_range_data)
+        # If the total records fit in a single request, fetch once
+        if total and total <= full_payload.length:
+            try:
+                response = self.session.session.post(
+                    url=self.url,
+                    data=full_payload.to_dict(),
+                    headers=self.headers,
+                )
+                response.raise_for_status()
+                data = response.json().get("aaData", [])
+                data_df = pd.DataFrame(data)
+            except Exception as exc:  # pragma: no cover - runtime/network
+                logging.exception("Single-request fetch failed: %s", exc)
 
-            data_df = pd.concat([data_df, date_range_data], ignore_index=True)
+            # proceed to normalization below
+        else:
+            # If cannot fetch all data in one request, divide it into ranges.
+            # interval_days = 10 should never exceed the max payload length of 4000
+            for dr in self.date_range.split(interval_days=1):
+                print(
+                    f"Fetching Scanview data from {dr.start.date()} to {dr.end.date()}"
+                )
+                payload = FetchPayload(
+                    date_from=dr.start,
+                    date_to=dr.end,
+                    columns=self.columns,
+                ).to_dict()
+
+                try:
+                    resp = self.session.session.post(
+                        url=self.url,
+                        data=payload,
+                        headers=self.headers,
+                    )
+                    resp.raise_for_status()
+                    date_range_data = resp.json().get("aaData", [])
+                except Exception as exc:  # pragma: no cover - runtime/network
+                    logging.exception(
+                        "Failed fetch for %s - %s: %s", dr.start, dr.end, exc
+                    )
+                    date_range_data = []
+
+                date_range_data = pd.DataFrame(date_range_data)
+                data_df = pd.concat([data_df, date_range_data], ignore_index=True)
+
+                # small pause to avoid triggering any rate-limiting
+                # time.sleep(0.05)
 
         for column in set(
             self._columns_containing(data_df, "date")
