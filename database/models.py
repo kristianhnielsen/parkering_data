@@ -15,7 +15,7 @@ class ScanviewPayment(Base):
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
     date: Mapped[datetime]
     type: Mapped[str]
-    description: Mapped[str] = mapped_column(nullable=True)
+    description: Mapped[Optional[str]]
     subscription_name: Mapped[str]
     start_date: Mapped[datetime]
     end_date: Mapped[datetime]
@@ -55,11 +55,11 @@ class ScanviewLog(Base):
     area_name: Mapped[str]
     area_id: Mapped[int]
     created_date_utc: Mapped[datetime]
-    end_date_utc: Mapped[Optional[datetime]] = mapped_column(nullable=True)
+    end_date_utc: Mapped[Optional[datetime]]
     price: Mapped[int]
     license_plate: Mapped[str]
-    payment_start_utc: Mapped[Optional[datetime]] = mapped_column(nullable=True)
-    payment_end_utc: Mapped[Optional[datetime]] = mapped_column(nullable=True)
+    payment_start_utc: Mapped[Optional[datetime]]
+    payment_end_utc: Mapped[Optional[datetime]]
     handle: Mapped[bool]
     handle_by_type: Mapped[str]
     handle_by: Mapped[str]
@@ -94,11 +94,11 @@ class SolvisionOrder(Base):
     parking_time: Mapped[int]
     payment_time: Mapped[datetime]
     license_plate: Mapped[str]
-    start_date: Mapped[Optional[datetime]] = mapped_column(nullable=True)
-    end_date: Mapped[Optional[datetime]] = mapped_column(nullable=True)
-    rate_type: Mapped[str] = mapped_column(nullable=True)
-    discount_code: Mapped[str] = mapped_column(nullable=True)
-    discount_type: Mapped[str] = mapped_column(nullable=True)
+    start_date: Mapped[Optional[datetime]]
+    end_date: Mapped[Optional[datetime]]
+    rate_type: Mapped[Optional[str]]
+    discount_code: Mapped[Optional[str]]
+    discount_type: Mapped[Optional[str]]
 
     def __init__(self, order: pd.Series):
         super().__init__()
@@ -134,7 +134,7 @@ class GiantleapOrder(Base):
     payment_method: Mapped[str]
     payment_card: Mapped[str]
     payment_transaction: Mapped[int]
-    note: Mapped[str] = mapped_column(nullable=True)
+    note: Mapped[Optional[str]]
 
     def __init__(self, order: pd.Series):
         super().__init__()
@@ -149,3 +149,32 @@ class GiantleapOrder(Base):
         self.payment_card = order.payment_card
         self.payment_transaction = order.payment_transaction
         self.note = order.note
+
+
+class ParkParkOverview(Base):
+    __tablename__ = "parkpark_overview"
+
+    id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+    name: Mapped[str]
+    external_id: Mapped[Optional[str]]
+    zone_name: Mapped[Optional[str]]
+    count: Mapped[int]
+    address: Mapped[str]
+    zip: Mapped[int]
+    city: Mapped[str]
+    seconds: Mapped[int]
+    minutes: Mapped[int]
+    amount: Mapped[int]
+
+    def __init__(self, overview: pd.Series):
+        super().__init__()
+        self.name = overview.name  # type: ignore
+        self.external_id = overview.external_id
+        self.zone_name = None if overview.zone_name == "" else overview.zone_name
+        self.count = overview.count  # type: ignore
+        self.address = overview.address
+        self.zip = overview.zip
+        self.city = overview.city
+        self.seconds = overview.seconds
+        self.minutes = overview.minutes
+        self.amount = overview.amount
