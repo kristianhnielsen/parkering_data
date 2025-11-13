@@ -3,9 +3,11 @@ import os
 from dotenv import load_dotenv
 import database.operations as db_ops
 from webscraper.giantleap import GiantleapScraper
+from webscraper.parkone import ParkOneAPI
 from webscraper.scanview import ScanviewScraper
 from database.models import (
     GiantleapOrder,
+    ParkOneParking,
     ParkParkParking,
     ScanviewPayment,
     ScanviewLog,
@@ -85,6 +87,14 @@ def get_parkpark(date_range: DateRange):
     return parkpark_data
 
 
+def get_parkone(date_range: DateRange):
+    parkone_api = ParkOneAPI(date_range)
+    parking_data = parkone_api.get_all_parkings()
+    parkone_data = [ParkOneParking(entry) for _, entry in parking_data.iterrows()]
+    print(f"Fetched {len(parkone_data)} ParkOne parking entries")
+    return parkone_data
+
+
 def main():
     load_dotenv()
     tables = []
@@ -106,6 +116,10 @@ def main():
     # Get ParkPark data
     parkpark_overview = get_parkpark(date_range)
     tables.append(parkpark_overview)
+
+    # Get ParkOne data
+    parkone_data = get_parkone(date_range)
+    tables.append(parkone_data)
 
     # Store data in the database
     with db_ops.get_db() as db:
