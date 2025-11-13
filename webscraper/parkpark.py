@@ -4,8 +4,7 @@ from urllib.parse import urljoin
 import pandas as pd
 import requests
 from dotenv import load_dotenv
-
-from utils import DateRange
+from webscraper.utils import DateRange
 
 
 ## API Documentation: https://documenter.getpostman.com/view/10718386/2sB3QCUEaa
