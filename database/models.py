@@ -171,10 +171,39 @@ class ParkParkOverview(Base):
         self.name = overview.name  # type: ignore
         self.external_id = overview.external_id
         self.zone_name = None if overview.zone_name == "" else overview.zone_name
-        self.count = overview.count  # type: ignore
+        self.count = overview["count"]  # type: ignore
         self.address = overview.address
         self.zip = overview.zip
         self.city = overview.city
         self.seconds = overview.seconds
         self.minutes = overview.minutes
         self.amount = overview.amount
+
+
+class ParkParkParking(Base):
+    __tablename__ = "parkpark_parking"
+
+    id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+    parking_id: Mapped[int]
+    external_id: Mapped[Optional[str]]
+    zone_name: Mapped[Optional[str]]
+    name: Mapped[str]
+    license_plate_country: Mapped[str]
+    license_plate: Mapped[str]
+    checkin: Mapped[datetime]
+    checkout: Mapped[datetime]
+    minutes: Mapped[int]
+    amount: Mapped[int]
+
+    def __init__(self, parking: pd.Series):
+        super().__init__()
+        self.parking_id = parking.parking_id
+        self.external_id = parking.external_id
+        self.name = parking.zone_name
+        self.zone_name = None if parking.zone_name == "" else parking.zone_name
+        self.license_plate_country = parking.reg_cc.upper()
+        self.license_plate = parking.reg.upper()
+        self.checkin = datetime.strptime(parking.checkin, "%Y-%m-%d %H:%M:%S")
+        self.checkout = datetime.strptime(parking.checkout, "%Y-%m-%d %H:%M:%S")
+        self.minutes = parking.minutes
+        self.amount = parking.amount
