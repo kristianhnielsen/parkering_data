@@ -4,15 +4,22 @@ from dotenv import load_dotenv
 import database.operations as db_ops
 from webscraper.giantleap import GiantleapScraper
 from webscraper.scanview import ScanviewScraper
-from database.models import GiantleapOrder, ScanviewPayment, ScanviewLog, SolvisionOrder
+from database.models import (
+    GiantleapOrder,
+    ParkParkParking,
+    ScanviewPayment,
+    ScanviewLog,
+    SolvisionOrder,
+)
 from webscraper.solvision import SolvisionScraper
+from webscraper.parkpark import ParkParkAPI
 from webscraper.utils import Credentials, DateRange, EnvManager
 
 
 def get_scanview(date_range: DateRange):
     # Initialize credentials and date range
     creds = Credentials(
-        username=EnvManager.get("SCANVIEW_USER"),
+        username=EnvManager.get("SCANVIEW_USERNAME"),
         password=EnvManager.get("SCANVIEW_PASSWORD"),
     )
     scanview_scraper = ScanviewScraper(creds, date_range, headless=True)
@@ -36,7 +43,7 @@ def get_scanview(date_range: DateRange):
 
 def get_solvision(date_range: DateRange):
     creds = Credentials(
-        username=EnvManager.get("SOLVISION_USER"),
+        username=EnvManager.get("SOLVISION_USERNAME"),
         password=EnvManager.get("SOLVISION_PASSWORD"),
     )
 
@@ -57,7 +64,7 @@ def get_solvision(date_range: DateRange):
 
 def get_giantleap(date_range: DateRange):
     creds = Credentials(
-        username=EnvManager.get("GIANTLEAP_USER"),
+        username=EnvManager.get("GIANTLEAP_USERNAME"),
         password=EnvManager.get("GIANTLEAP_PASSWORD"),
     )
     data_fetcher = GiantleapScraper(creds, date_range, headless=True)
@@ -67,6 +74,15 @@ def get_giantleap(date_range: DateRange):
     print(f"Fetched {len(giantleap_data)} Giantleap orders")
 
     return giantleap_data
+
+
+def get_parkpark(date_range: DateRange):
+    api_key = EnvManager.get("PARKPARK_API_KEY")
+    parkpark_api = ParkParkAPI(api_key, date_range)
+    parking_data = parkpark_api.fetch_parkings()
+    parkpark_data = [ParkParkParking(entry) for _, entry in parking_data.iterrows()]
+    print(f"Fetched {len(parkpark_data)} ParkPark parking entries")
+    return parkpark_data
 
 
 def main():
@@ -86,6 +102,10 @@ def main():
     # Get Giantleap data
     giantleap_orders = get_giantleap(date_range)
     tables.append(giantleap_orders)
+
+    # Get ParkPark data
+    parkpark_overview = get_parkpark(date_range)
+    tables.append(parkpark_overview)
 
     # Store data in the database
     with db_ops.get_db() as db:
