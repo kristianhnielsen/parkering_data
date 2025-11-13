@@ -207,3 +207,26 @@ class ParkParkParking(Base):
         self.checkout = datetime.strptime(parking.checkout, "%Y-%m-%d %H:%M:%S")
         self.minutes = parking.minutes
         self.amount = parking.amount
+
+
+class ParkOneParking(Base):
+    __tablename__ = "parkone_all_parking"
+
+    id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+    parkone_parking_id: Mapped[int]
+    external_parking_id: Mapped[Optional[str]]
+    parking_start_time: Mapped[datetime]
+    parking_stop_at: Mapped[Optional[datetime]]
+    vehicle_reg_id: Mapped[str]
+    zone: Mapped[str]
+    total_amount: Mapped[float]
+
+    def __init__(self, parking: pd.Series):
+        super().__init__()
+        self.parking_start_time = parking.parkingStartTime
+        self.parking_stop_at = parking.parkingStopAt
+        self.vehicle_reg_id = parking.vehicleRegId
+        self.zone = parking.zone
+        self.total_amount = parking.totalAmount
+        self.parkone_parking_id = parking.parkoneParkingId
+        self.external_parking_id = parking.externalParkingId
