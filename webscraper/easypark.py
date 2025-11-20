@@ -4,9 +4,6 @@ import requests
 from dotenv import load_dotenv
 import os
 from urllib.parse import urljoin
-
-# from utils import DateRange
-
 from webscraper.utils import DateRange
 
 # Documentation: https://external-gw-staging.easyparksystem.net/api/swagger-ui/index.html#/authentication-resource/getJ%20wtUsingPOST
