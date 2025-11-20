@@ -255,12 +255,12 @@ class EasyParkParking(Base):
 
     def __init__(self, parking: pd.Series):
         super().__init__()
+        # Preprocess datetimes
         parking = safe_na_datetime(parking)
-        try:
-            parking["startDate"] = parking["startDate"].split(".")[0].split("+")[0]
-            parking["endDate"] = parking["endDate"].split(".")[0].split("+")[0]
-        except Exception as e:
-            print(f"Error processing dates: {e}")
+        parking["startDate"] = parking["startDate"].split(".")[0].split("+")[0]
+        parking["endDate"] = parking["endDate"].split(".")[0].split("+")[0]
+
+        # Assign values
         self.area = parking["areaNo"]
         self.country = parking["areaCountryCode"]
         self.start_date = datetime.strptime(parking["startDate"], "%Y-%m-%dT%H:%M:%S")
