@@ -9,6 +9,7 @@ from webscraper.scanview import ScanviewScraper
 from database.models import (
     EasyParkParking,
     GiantleapOrder,
+    Logs,
     ParkOneParking,
     ParkParkParking,
     ScanviewPayment,
@@ -109,36 +110,81 @@ def main():
     load_dotenv()
     tables = []
     date_range = DateRange(start=datetime(2025, 9, 20), end=datetime.now())
+    run_time = datetime.now()
 
-    # Get Scanview data
-    scanview_orders, scanview_logs = get_scanview(date_range)
-    tables.append(scanview_orders)
-    tables.append(scanview_logs)
+    try:
+        # Get Scanview data
+        scanview_orders, scanview_logs = get_scanview(date_range)
+        tables.append(scanview_orders)
+        tables.append(scanview_logs)
 
-    # Get Solvision data
-    solvision_orders = get_solvision(date_range)
-    tables.append(solvision_orders)
+        # Get Solvision data
+        solvision_orders = get_solvision(date_range)
+        tables.append(solvision_orders)
 
-    # Get Giantleap data
-    giantleap_orders = get_giantleap(date_range)
-    tables.append(giantleap_orders)
+        # Get Giantleap data
+        giantleap_orders = get_giantleap(date_range)
+        tables.append(giantleap_orders)
 
-    # Get ParkPark data
-    parkpark_overview = get_parkpark(date_range)
-    tables.append(parkpark_overview)
+        # Get ParkPark data
+        parkpark_overview = get_parkpark(date_range)
+        tables.append(parkpark_overview)
 
-    # Get ParkOne data
-    parkone_data = get_parkone(date_range)
-    tables.append(parkone_data)
+        # Get ParkOne data
+        parkone_data = get_parkone(date_range)
+        tables.append(parkone_data)
 
-    # Get EasyPark data
-    easypark_data = get_easypark(date_range)
-    tables.append(easypark_data)
+        # Get EasyPark data
+        easypark_data = get_easypark(date_range)
+        tables.append(easypark_data)
 
-    # Store data in the database
-    with db_ops.get_db() as db:
-        for table in tables:
-            db.add_all(table)
+        # Create log entry
+        runtime = (datetime.now() - run_time).total_seconds()
+        log_entry = Logs(
+            run_time=run_time,
+            date_range_from=date_range.start,
+            date_range_to=date_range.end,
+            scanview_payment_entries=len(scanview_orders),
+            scanview_log_entries=len(scanview_logs),
+            solvision_order_entries=len(solvision_orders),
+            giantleap_order_entries=len(giantleap_orders),
+            parkpark_entries=len(parkpark_overview),
+            parkone_entries=len(parkone_data),
+            easypark_entries=len(easypark_data),
+            status="SUCCESS",
+            message="Successfully fetched all data",
+            runtime_seconds=runtime,
+        )
+
+        # Store data in the database
+        with db_ops.get_db() as db:
+            for table in tables:
+                db.add_all(table)
+            db.add(log_entry)
+
+    except Exception as e:
+        # Create failure log entry
+        runtime = (datetime.now() - run_time).total_seconds()
+        log_entry = Logs(
+            run_time=run_time,
+            date_range_from=date_range.start,
+            date_range_to=date_range.end,
+            scanview_payment_entries=0,
+            scanview_log_entries=0,
+            solvision_order_entries=0,
+            giantleap_order_entries=0,
+            parkpark_entries=0,
+            parkone_entries=0,
+            easypark_entries=0,
+            status="FAILED",
+            message=str(e),
+            runtime_seconds=runtime,
+        )
+
+        with db_ops.get_db() as db:
+            db.add(log_entry)
+
+        raise
 
 
 if __name__ == "__main__":

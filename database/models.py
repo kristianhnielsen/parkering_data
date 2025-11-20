@@ -248,3 +248,53 @@ class EasyParkParking(Base):
         self.spot = parking["spotNumber"]
         self.area_name = parking["areaName"]
         self.external_transaction_id = parking["externalTransactionNumber"]
+
+
+class Logs(Base):
+    __tablename__ = "logs"
+
+    id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+    run_time: Mapped[datetime]
+    date_range_from: Mapped[datetime]
+    date_range_to: Mapped[datetime]
+    easypark_entries: Mapped[int]
+    parkone_entries: Mapped[int]
+    parkpark_entries: Mapped[int]
+    scanview_payment_entries: Mapped[int]
+    scanview_log_entries: Mapped[int]
+    solvision_order_entries: Mapped[int]
+    giantleap_order_entries: Mapped[int]
+    status: Mapped[str]
+    message: Mapped[str]
+    runtime_seconds: Mapped[float]
+
+    def __init__(
+        self,
+        run_time: datetime,
+        date_range_from: datetime,
+        date_range_to: datetime,
+        easypark_entries: int,
+        parkone_entries: int,
+        parkpark_entries: int,
+        scanview_payment_entries: int,
+        scanview_log_entries: int,
+        solvision_order_entries: int,
+        giantleap_order_entries: int,
+        status: str,
+        message: str,
+        runtime_seconds: float,
+    ):
+        super().__init__()
+        self.run_time = run_time
+        self.date_range_from = date_range_from
+        self.date_range_to = date_range_to
+        self.easypark_entries = easypark_entries
+        self.parkone_entries = parkone_entries
+        self.parkpark_entries = parkpark_entries
+        self.scanview_payment_entries = scanview_payment_entries
+        self.scanview_log_entries = scanview_log_entries
+        self.solvision_order_entries = solvision_order_entries
+        self.giantleap_order_entries = giantleap_order_entries
+        self.status = status
+        self.message = message
+        self.runtime_seconds = runtime_seconds
