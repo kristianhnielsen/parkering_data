@@ -2,10 +2,12 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 import database.operations as db_ops
+from webscraper.easypark import EasyParkAPI
 from webscraper.giantleap import GiantleapScraper
 from webscraper.parkone import ParkOneAPI
 from webscraper.scanview import ScanviewScraper
 from database.models import (
+    EasyParkParking,
     GiantleapOrder,
     ParkOneParking,
     ParkParkParking,
@@ -95,6 +97,14 @@ def get_parkone(date_range: DateRange):
     return parkone_data
 
 
+def get_easypark(date_range: DateRange):
+    easypark_api = EasyParkAPI()
+    easypark_data = easypark_api.get_parking(date_range)
+    easypark_data = [EasyParkParking(entry) for _, entry in easypark_data.iterrows()]
+    print(f"Fetched {len(easypark_data)} EasyPark parking entries")
+    return easypark_data
+
+
 def main():
     load_dotenv()
     tables = []
@@ -120,6 +130,10 @@ def main():
     # Get ParkOne data
     parkone_data = get_parkone(date_range)
     tables.append(parkone_data)
+
+    # Get EasyPark data
+    easypark_data = get_easypark(date_range)
+    tables.append(easypark_data)
 
     # Store data in the database
     with db_ops.get_db() as db:
