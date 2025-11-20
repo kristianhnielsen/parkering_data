@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 import pandas as pd
 import requests
 from dotenv import load_dotenv
