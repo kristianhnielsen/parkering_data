@@ -112,31 +112,82 @@ def main():
     date_range = DateRange(start=datetime(2025, 9, 20), end=datetime.now())
     run_time = datetime.now()
 
+    # Track counts and errors for each data source
+    entry_counts = {
+        "scanview_payment_entries": 0,
+        "scanview_log_entries": 0,
+        "solvision_order_entries": 0,
+        "giantleap_order_entries": 0,
+        "parkpark_entries": 0,
+        "parkone_entries": 0,
+        "easypark_entries": 0,
+    }
+    errors = []
+
     try:
         # Get Scanview data
-        scanview_orders, scanview_logs = get_scanview(date_range)
-        tables.append(scanview_orders)
-        tables.append(scanview_logs)
+        try:
+            scanview_orders, scanview_logs = get_scanview(date_range)
+            tables.append(scanview_orders)
+            tables.append(scanview_logs)
+            entry_counts["scanview_payment_entries"] = len(scanview_orders)
+            entry_counts["scanview_log_entries"] = len(scanview_logs)
+        except Exception as e:
+            errors.append(f"Scanview: {str(e)}")
+            print(f"Error fetching Scanview data: {e}")
 
         # Get Solvision data
-        solvision_orders = get_solvision(date_range)
-        tables.append(solvision_orders)
+        try:
+            solvision_orders = get_solvision(date_range)
+            tables.append(solvision_orders)
+            entry_counts["solvision_order_entries"] = len(solvision_orders)
+        except Exception as e:
+            errors.append(f"Solvision: {str(e)}")
+            print(f"Error fetching Solvision data: {e}")
 
         # Get Giantleap data
-        giantleap_orders = get_giantleap(date_range)
-        tables.append(giantleap_orders)
+        try:
+            giantleap_orders = get_giantleap(date_range)
+            tables.append(giantleap_orders)
+            entry_counts["giantleap_order_entries"] = len(giantleap_orders)
+        except Exception as e:
+            errors.append(f"Giantleap: {str(e)}")
+            print(f"Error fetching Giantleap data: {e}")
 
         # Get ParkPark data
-        parkpark_overview = get_parkpark(date_range)
-        tables.append(parkpark_overview)
+        try:
+            parkpark_overview = get_parkpark(date_range)
+            tables.append(parkpark_overview)
+            entry_counts["parkpark_entries"] = len(parkpark_overview)
+        except Exception as e:
+            errors.append(f"ParkPark: {str(e)}")
+            print(f"Error fetching ParkPark data: {e}")
 
         # Get ParkOne data
-        parkone_data = get_parkone(date_range)
-        tables.append(parkone_data)
+        try:
+            parkone_data = get_parkone(date_range)
+            tables.append(parkone_data)
+            entry_counts["parkone_entries"] = len(parkone_data)
+        except Exception as e:
+            errors.append(f"ParkOne: {str(e)}")
+            print(f"Error fetching ParkOne data: {e}")
 
         # Get EasyPark data
-        easypark_data = get_easypark(date_range)
-        tables.append(easypark_data)
+        try:
+            easypark_data = get_easypark(date_range)
+            tables.append(easypark_data)
+            entry_counts["easypark_entries"] = len(easypark_data)
+        except Exception as e:
+            errors.append(f"EasyPark: {str(e)}")
+            print(f"Error fetching EasyPark data: {e}")
+
+        # Determine overall status
+        if errors:
+            status = "PARTIAL_SUCCESS" if any(entry_counts.values()) else "FAILED"
+            message = "Errors occurred: " + "; ".join(errors)
+        else:
+            status = "SUCCESS"
+            message = "Successfully fetched all data"
 
         # Create log entry
         runtime = (datetime.now() - run_time).total_seconds()
@@ -144,15 +195,15 @@ def main():
             run_time=run_time,
             date_range_from=date_range.start,
             date_range_to=date_range.end,
-            scanview_payment_entries=len(scanview_orders),
-            scanview_log_entries=len(scanview_logs),
-            solvision_order_entries=len(solvision_orders),
-            giantleap_order_entries=len(giantleap_orders),
-            parkpark_entries=len(parkpark_overview),
-            parkone_entries=len(parkone_data),
-            easypark_entries=len(easypark_data),
-            status="SUCCESS",
-            message="Successfully fetched all data",
+            scanview_payment_entries=entry_counts["scanview_payment_entries"],
+            scanview_log_entries=entry_counts["scanview_log_entries"],
+            solvision_order_entries=entry_counts["solvision_order_entries"],
+            giantleap_order_entries=entry_counts["giantleap_order_entries"],
+            parkpark_entries=entry_counts["parkpark_entries"],
+            parkone_entries=entry_counts["parkone_entries"],
+            easypark_entries=entry_counts["easypark_entries"],
+            status=status,
+            message=message,
             runtime_seconds=runtime,
         )
 
@@ -162,20 +213,24 @@ def main():
                 db.add_all(table)
             db.add(log_entry)
 
+        # Raise exception if all sources failed
+        if status == "FAILED":
+            raise Exception(message)
+
     except Exception as e:
-        # Create failure log entry
+        # Create failure log entry if not already created
         runtime = (datetime.now() - run_time).total_seconds()
         log_entry = Logs(
             run_time=run_time,
             date_range_from=date_range.start,
             date_range_to=date_range.end,
-            scanview_payment_entries=0,
-            scanview_log_entries=0,
-            solvision_order_entries=0,
-            giantleap_order_entries=0,
-            parkpark_entries=0,
-            parkone_entries=0,
-            easypark_entries=0,
+            scanview_payment_entries=entry_counts["scanview_payment_entries"],
+            scanview_log_entries=entry_counts["scanview_log_entries"],
+            solvision_order_entries=entry_counts["solvision_order_entries"],
+            giantleap_order_entries=entry_counts["giantleap_order_entries"],
+            parkpark_entries=entry_counts["parkpark_entries"],
+            parkone_entries=entry_counts["parkone_entries"],
+            easypark_entries=entry_counts["easypark_entries"],
             status="FAILED",
             message=str(e),
             runtime_seconds=runtime,
