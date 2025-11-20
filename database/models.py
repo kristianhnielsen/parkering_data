@@ -151,35 +151,6 @@ class GiantleapOrder(Base):
         self.note = order.note
 
 
-class ParkParkOverview(Base):
-    __tablename__ = "parkpark_overview"
-
-    id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
-    name: Mapped[str]
-    external_id: Mapped[Optional[str]]
-    zone_name: Mapped[Optional[str]]
-    count: Mapped[int]
-    address: Mapped[str]
-    zip: Mapped[int]
-    city: Mapped[str]
-    seconds: Mapped[int]
-    minutes: Mapped[int]
-    amount: Mapped[int]
-
-    def __init__(self, overview: pd.Series):
-        super().__init__()
-        self.name = overview.name  # type: ignore
-        self.external_id = overview.external_id
-        self.zone_name = None if overview.zone_name == "" else overview.zone_name
-        self.count = overview["count"]  # type: ignore
-        self.address = overview.address
-        self.zip = overview.zip
-        self.city = overview.city
-        self.seconds = overview.seconds
-        self.minutes = overview.minutes
-        self.amount = overview.amount
-
-
 class ParkParkParking(Base):
     __tablename__ = "parkpark_parking"
 
