@@ -230,3 +230,50 @@ class ParkOneParking(Base):
         self.total_amount = parking.totalAmount
         self.parkone_parking_id = parking.parkoneParkingId
         self.external_parking_id = parking.externalParkingId
+
+
+class EasyParkParking(Base):
+    __tablename__ = "easypark_parking"
+
+    id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+    area: Mapped[int]
+    country: Mapped[str]
+    start_date: Mapped[datetime]
+    end_date: Mapped[datetime]
+    license_plate: Mapped[str]
+    fee_exclusive_vat: Mapped[Optional[float]]
+    fee_inclusive_vat: Mapped[Optional[float]]
+    fee_vat: Mapped[Optional[float]]
+    currency: Mapped[str]
+    parking_id: Mapped[int]
+    stopped: Mapped[bool]
+    source: Mapped[Optional[str]]
+    subtype: Mapped[str]
+    spot: Mapped[Optional[str]]
+    area_name: Mapped[str]
+    external_transaction_id: Mapped[Optional[str]]
+
+    def __init__(self, parking: pd.Series):
+        super().__init__()
+        parking = safe_na_datetime(parking)
+        try:
+            parking["startDate"] = parking["startDate"].split(".")[0].split("+")[0]
+            parking["endDate"] = parking["endDate"].split(".")[0].split("+")[0]
+        except Exception as e:
+            print(f"Error processing dates: {e}")
+        self.area = parking["areaNo"]
+        self.country = parking["areaCountryCode"]
+        self.start_date = datetime.strptime(parking["startDate"], "%Y-%m-%dT%H:%M:%S")
+        self.end_date = datetime.strptime(parking["endDate"], "%Y-%m-%dT%H:%M:%S")
+        self.license_plate = parking["licenseNumber"]
+        self.fee_exclusive_vat = parking["parkingFeeExclusiveVAT"]
+        self.fee_inclusive_vat = parking["parkingFeeInclusiveVAT"]
+        self.fee_vat = parking["parkingFeeVAT"]
+        self.currency = parking["currency"]
+        self.parking_id = parking["parkingId"]
+        self.stopped = parking["stopped"]
+        self.source = parking["sourceSystem"]
+        self.subtype = parking["subType"]
+        self.spot = parking["spotNumber"]
+        self.area_name = parking["areaName"]
+        self.external_transaction_id = parking["externalTransactionNumber"]
