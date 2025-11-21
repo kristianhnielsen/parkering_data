@@ -219,7 +219,7 @@ class EasyParkParking(Base):
     parking_id: Mapped[int]
     stopped: Mapped[bool]
     source: Mapped[Optional[str]]
-    subtype: Mapped[str]
+    subtype: Mapped[Optional[str]]
     spot: Mapped[Optional[str]]
     area_name: Mapped[str]
     external_transaction_id: Mapped[Optional[str]]
