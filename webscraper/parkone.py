@@ -38,19 +38,21 @@ class ParkOneAPI:
         # API docs specify no date ranges > 6 months. We split into 30 day intervals to be safe.
         date_ranges = self.date_range.split(interval_days=30)
         for date_range in date_ranges:
-            params = {
-                "municipality": self.municipality,
-                "startDate": self._dt_ms_format(date_range.start),
-                "endDate": self._dt_ms_format(date_range.end),
-            }
+            try:
+                params = {
+                    "municipality": self.municipality,
+                    "startDate": self._dt_ms_format(date_range.start),
+                    "endDate": self._dt_ms_format(date_range.end),
+                }
 
-            response = requests.get(url, headers=self.headers, params=params)
-            response.raise_for_status()
-            data = response.json()
-            df = pd.concat([df, pd.DataFrame(data)], ignore_index=True)
-            df["parkingStartTime"] = pd.to_datetime(df["parkingStartTime"])
-            df["parkingStopAt"] = pd.to_datetime(df["parkingStopAt"])
-
+                response = requests.get(url, headers=self.headers, params=params)
+                response.raise_for_status()
+                data = response.json()
+                df = pd.concat([df, pd.DataFrame(data)], ignore_index=True)
+                df["parkingStartTime"] = pd.to_datetime(df["parkingStartTime"])
+                df["parkingStopAt"] = pd.to_datetime(df["parkingStopAt"])
+            except Exception as e:
+                continue
         return df
 
     def _dt_ms_format(self, dt: datetime) -> str:

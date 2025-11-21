@@ -42,23 +42,28 @@ class EasyParkAPI:
             "X-Authorization": f"Bearer {self.id_token}",
             "Content-Type": "application/json",
         }
+        df = pd.DataFrame()
 
-        params = {
-            "from": date_range.start.strftime("%Y-%m-%d"),
-            "to": date_range.end.strftime("%Y-%m-%d"),
-            "operatorId": 3340,
-        }
+        date_ranges = date_range.split(interval_days=30)
+        for date_range in date_ranges:
 
-        response = requests.get(
-            url,
-            headers=headers,
-            params=params,
-        )
+            params = {
+                "from": date_range.start.strftime("%Y-%m-%d"),
+                "to": date_range.end.strftime("%Y-%m-%d"),
+                "operatorId": 3340,
+            }
 
-        response.raise_for_status()
-        data = response.json()
+            response = requests.get(
+                url,
+                headers=headers,
+                params=params,
+            )
 
-        return pd.DataFrame(data)
+            response.raise_for_status()
+            data = response.json()
+            df = pd.concat([df, pd.DataFrame(data)], ignore_index=True)
+
+        return df
 
 
 if __name__ == "__main__":
