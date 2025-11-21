@@ -12,3 +12,4 @@ wheels/
 
 # Database files
 *.db
+*runtime_log.csv
