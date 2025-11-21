@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
 import database.operations as db_ops
+from runtime_logger import RuntimeLogger
 from webscraper.easypark import EasyParkAPI
 from webscraper.giantleap import GiantleapScraper
 from webscraper.parkone import ParkOneAPI
@@ -111,6 +112,12 @@ def main():
     tables = []
     date_range = DateRange(start=datetime(2025, 9, 20), end=datetime.now())
     run_time = datetime.now()
+    runtime_log = RuntimeLogger()
+    last_run = runtime_log.get_last_runtime(status="SUCCESS")
+    if last_run:
+        print(f"Last successful run: {last_run}")
+        date_range.start = last_run - timedelta(days=7)
+        print(f"Adjusted date range start to: {date_range.start}")
 
     # Track counts and errors for each data source
     entry_counts = {
@@ -190,6 +197,10 @@ def main():
             message = "Successfully fetched all data"
 
         # Create log entry
+        runtime_log.save_log(
+            start_time=run_time,
+            status=status,
+        )
         runtime = (datetime.now() - run_time).total_seconds()
         log_entry = Logs(
             run_time=run_time,
