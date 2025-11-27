@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -66,9 +66,20 @@ class FetchPayload:
     )
 
     def to_dict(self) -> dict:
+        # Convert to UTC before formatting with Z suffix
+        start_utc = (
+            self.date_from.astimezone(timezone.utc)
+            if self.date_from.tzinfo
+            else self.date_from
+        )
+        end_utc = (
+            self.date_to.astimezone(timezone.utc)
+            if self.date_to.tzinfo
+            else self.date_to
+        )
         payload = {
-            "Start": self.date_from.strftime("%Y-%m-%dT%H:%M:00.000Z"),
-            "End": self.date_to.strftime("%Y-%m-%dT%H:%M:00.000Z"),
+            "Start": start_utc.strftime("%Y-%m-%dT%H:%M:00.000Z"),
+            "End": end_utc.strftime("%Y-%m-%dT%H:%M:00.000Z"),
             "Meters": self.meters,
         }
         return payload
