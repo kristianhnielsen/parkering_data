@@ -221,10 +221,8 @@ class BaseDataFetcher:
         return data_df.drop_duplicates()
 
     def _col_to_datetime(self, df_col: pd.Series):
-        return pd.to_datetime(
-            df_col.str.extract(r"\((\d+)\)")[0].astype(np.int64, errors="ignore"),
-            unit="ms",
-        )
+        extracted = pd.to_numeric(df_col.str.extract(r"\((\d+)\)")[0], errors="coerce")
+        return pd.to_datetime(extracted, unit="ms")
 
     def _columns_containing(self, df: pd.DataFrame, keyword: str) -> list[str]:
         return [col for col in df.columns.tolist() if keyword.lower() in col.lower()]
