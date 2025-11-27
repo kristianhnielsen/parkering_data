@@ -10,7 +10,7 @@ class Base(DeclarativeBase):
 
 
 class ScanviewPayment(Base):
-    __tablename__ = "scanview_payment"
+    __tablename__ = "scanview"
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
     date: Mapped[datetime]
@@ -81,7 +81,7 @@ class ScanviewLog(Base):
 
 
 class SolvisionOrder(Base):
-    __tablename__ = "solvision_order"
+    __tablename__ = "solvision"
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
     location_id: Mapped[int]
@@ -121,7 +121,7 @@ class SolvisionOrder(Base):
 
 
 class GiantleapOrder(Base):
-    __tablename__ = "giantleap_order"
+    __tablename__ = "giantleap"
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
     report_time: Mapped[datetime]
@@ -152,7 +152,7 @@ class GiantleapOrder(Base):
 
 
 class ParkParkParking(Base):
-    __tablename__ = "parkpark_parking"
+    __tablename__ = "parkpark"
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
     parking_id: Mapped[int]
@@ -181,7 +181,7 @@ class ParkParkParking(Base):
 
 
 class ParkOneParking(Base):
-    __tablename__ = "parkone_all_parking"
+    __tablename__ = "parkone"
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
     parkone_parking_id: Mapped[int]
@@ -204,7 +204,7 @@ class ParkOneParking(Base):
 
 
 class EasyParkParking(Base):
-    __tablename__ = "easypark_parking"
+    __tablename__ = "easypark"
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
     area: Mapped[int]
