@@ -192,7 +192,7 @@ class DataFetcher:
         # Convert date columns to datetime
         date_columns = ["paymentTime", "start", "end"]
         for col in date_columns:
-            data_df[col] = pd.to_datetime(data_df[col])
+            data_df[col] = pd.to_datetime(data_df[col], format="ISO8601")
 
         return data_df
 
