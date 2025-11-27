@@ -8,14 +8,14 @@ from webscraper.giantleap import GiantleapScraper
 from webscraper.parkone import ParkOneAPI
 from webscraper.scanview import ScanviewScraper
 from database.models import (
-    EasyParkParking,
-    GiantleapOrder,
+    EasyPark,
+    Giantleap,
     Logs,
-    ParkOneParking,
-    ParkParkParking,
-    ScanviewPayment,
+    ParkOne,
+    ParkPark,
+    Scanview,
     ScanviewLog,
-    SolvisionOrder,
+    Solvision,
 )
 from webscraper.solvision import SolvisionScraper
 from webscraper.parkpark import ParkParkAPI
@@ -33,7 +33,7 @@ def get_scanview(date_range: DateRange):
     # Fetch payment data
     scanview_payments = scanview_scraper.get_payment_data()
     scanview_orders = [
-        ScanviewPayment(order=payment_order)
+        Scanview(order=payment_order)
         for _, payment_order in scanview_payments.iterrows()
     ]
     print(f"Fetched {len(scanview_orders)} Scanview orders")
@@ -62,7 +62,7 @@ def get_solvision(date_range: DateRange):
     total_row = data[data["cardFirm"] == "Total"]
     data.drop(total_row.index, inplace=True)
 
-    solvision_data = [SolvisionOrder(order=order) for _, order in data.iterrows()]
+    solvision_data = [Solvision(order=order) for _, order in data.iterrows()]
     print(f"Fetched {len(solvision_data)} Solvision orders")
 
     return solvision_data
@@ -76,7 +76,7 @@ def get_giantleap(date_range: DateRange):
     data_fetcher = GiantleapScraper(creds, date_range, headless=True)
     data = data_fetcher.fetch()
 
-    giantleap_data = [GiantleapOrder(order=order) for _, order in data.iterrows()]
+    giantleap_data = [Giantleap(order=order) for _, order in data.iterrows()]
     print(f"Fetched {len(giantleap_data)} Giantleap orders")
 
     return giantleap_data
@@ -86,7 +86,7 @@ def get_parkpark(date_range: DateRange):
     api_key = EnvManager.get("PARKPARK_API_KEY")
     parkpark_api = ParkParkAPI(api_key, date_range)
     parking_data = parkpark_api.fetch_parkings()
-    parkpark_data = [ParkParkParking(entry) for _, entry in parking_data.iterrows()]
+    parkpark_data = [ParkPark(entry) for _, entry in parking_data.iterrows()]
     print(f"Fetched {len(parkpark_data)} ParkPark parking entries")
     return parkpark_data
 
@@ -94,7 +94,7 @@ def get_parkpark(date_range: DateRange):
 def get_parkone(date_range: DateRange):
     parkone_api = ParkOneAPI(date_range)
     parking_data = parkone_api.get_all_parkings()
-    parkone_data = [ParkOneParking(entry) for _, entry in parking_data.iterrows()]
+    parkone_data = [ParkOne(entry) for _, entry in parking_data.iterrows()]
     print(f"Fetched {len(parkone_data)} ParkOne parking entries")
     return parkone_data
 
@@ -102,7 +102,7 @@ def get_parkone(date_range: DateRange):
 def get_easypark(date_range: DateRange):
     easypark_api = EasyParkAPI()
     easypark_data = easypark_api.get_parking(date_range)
-    easypark_data = [EasyParkParking(entry) for _, entry in easypark_data.iterrows()]
+    easypark_data = [EasyPark(entry) for _, entry in easypark_data.iterrows()]
     print(f"Fetched {len(easypark_data)} EasyPark parking entries")
     return easypark_data
 
@@ -121,10 +121,10 @@ def main():
 
     # Track counts and errors for each data source
     entry_counts = {
-        "scanview_payment_entries": 0,
+        "scanview_entries": 0,
         "scanview_log_entries": 0,
-        "solvision_order_entries": 0,
-        "giantleap_order_entries": 0,
+        "solvision_entries": 0,
+        "giantleap_entries": 0,
         "parkpark_entries": 0,
         "parkone_entries": 0,
         "easypark_entries": 0,
@@ -137,7 +137,7 @@ def main():
             scanview_orders, scanview_logs = get_scanview(date_range)
             tables.append(scanview_orders)
             tables.append(scanview_logs)
-            entry_counts["scanview_payment_entries"] = len(scanview_orders)
+            entry_counts["scanview_entries"] = len(scanview_orders)
             entry_counts["scanview_log_entries"] = len(scanview_logs)
         except Exception as e:
             errors.append(f"Scanview: {str(e)}")
@@ -147,7 +147,7 @@ def main():
         try:
             solvision_orders = get_solvision(date_range)
             tables.append(solvision_orders)
-            entry_counts["solvision_order_entries"] = len(solvision_orders)
+            entry_counts["solvision_entries"] = len(solvision_orders)
         except Exception as e:
             errors.append(f"Solvision: {str(e)}")
             print(f"Error fetching Solvision data: {e}")
@@ -156,7 +156,7 @@ def main():
         try:
             giantleap_orders = get_giantleap(date_range)
             tables.append(giantleap_orders)
-            entry_counts["giantleap_order_entries"] = len(giantleap_orders)
+            entry_counts["giantleap_entries"] = len(giantleap_orders)
         except Exception as e:
             errors.append(f"Giantleap: {str(e)}")
             print(f"Error fetching Giantleap data: {e}")
@@ -206,10 +206,10 @@ def main():
             run_time=run_time,
             date_range_from=date_range.start,
             date_range_to=date_range.end,
-            scanview_payment_entries=entry_counts["scanview_payment_entries"],
+            scanview_entries=entry_counts["scanview_entries"],
             scanview_log_entries=entry_counts["scanview_log_entries"],
-            solvision_order_entries=entry_counts["solvision_order_entries"],
-            giantleap_order_entries=entry_counts["giantleap_order_entries"],
+            solvision_entries=entry_counts["solvision_entries"],
+            giantleap_entries=entry_counts["giantleap_entries"],
             parkpark_entries=entry_counts["parkpark_entries"],
             parkone_entries=entry_counts["parkone_entries"],
             easypark_entries=entry_counts["easypark_entries"],
@@ -235,10 +235,10 @@ def main():
             run_time=run_time,
             date_range_from=date_range.start,
             date_range_to=date_range.end,
-            scanview_payment_entries=entry_counts["scanview_payment_entries"],
+            scanview_entries=entry_counts["scanview_entries"],
             scanview_log_entries=entry_counts["scanview_log_entries"],
-            solvision_order_entries=entry_counts["solvision_order_entries"],
-            giantleap_order_entries=entry_counts["giantleap_order_entries"],
+            solvision_entries=entry_counts["solvision_entries"],
+            giantleap_entries=entry_counts["giantleap_entries"],
             parkpark_entries=entry_counts["parkpark_entries"],
             parkone_entries=entry_counts["parkone_entries"],
             easypark_entries=entry_counts["easypark_entries"],

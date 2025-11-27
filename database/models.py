@@ -260,10 +260,10 @@ class Logs(Base):
     easypark_entries: Mapped[int]
     parkone_entries: Mapped[int]
     parkpark_entries: Mapped[int]
-    scanview_payment_entries: Mapped[int]
+    scanview_entries: Mapped[int]
     scanview_log_entries: Mapped[int]
-    solvision_order_entries: Mapped[int]
-    giantleap_order_entries: Mapped[int]
+    solvision_entries: Mapped[int]
+    giantleap_entries: Mapped[int]
     status: Mapped[str]
     message: Mapped[str]
     runtime_seconds: Mapped[float]
@@ -276,10 +276,10 @@ class Logs(Base):
         easypark_entries: int,
         parkone_entries: int,
         parkpark_entries: int,
-        scanview_payment_entries: int,
+        scanview_entries: int,
         scanview_log_entries: int,
-        solvision_order_entries: int,
-        giantleap_order_entries: int,
+        solvision_entries: int,
+        giantleap_entries: int,
         status: str,
         message: str,
         runtime_seconds: float,
@@ -291,10 +291,10 @@ class Logs(Base):
         self.easypark_entries = easypark_entries
         self.parkone_entries = parkone_entries
         self.parkpark_entries = parkpark_entries
-        self.scanview_payment_entries = scanview_payment_entries
+        self.scanview_entries = scanview_entries
         self.scanview_log_entries = scanview_log_entries
-        self.solvision_order_entries = solvision_order_entries
-        self.giantleap_order_entries = giantleap_order_entries
+        self.solvision_entries = solvision_entries
+        self.giantleap_entries = giantleap_entries
         self.status = status
         self.message = message
         self.runtime_seconds = runtime_seconds
