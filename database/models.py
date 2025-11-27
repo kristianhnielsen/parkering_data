@@ -9,7 +9,7 @@ class Base(DeclarativeBase):
     pass
 
 
-class ScanviewPayment(Base):
+class Scanview(Base):
     __tablename__ = "scanview"
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
@@ -80,7 +80,7 @@ class ScanviewLog(Base):
         self.handle_by = log.HandleBy
 
 
-class SolvisionOrder(Base):
+class Solvision(Base):
     __tablename__ = "solvision"
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
@@ -120,7 +120,7 @@ class SolvisionOrder(Base):
         self.discount_type = order.discountType
 
 
-class GiantleapOrder(Base):
+class Giantleap(Base):
     __tablename__ = "giantleap"
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
@@ -151,7 +151,7 @@ class GiantleapOrder(Base):
         self.note = order.note
 
 
-class ParkParkParking(Base):
+class ParkPark(Base):
     __tablename__ = "parkpark"
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
@@ -180,7 +180,7 @@ class ParkParkParking(Base):
         self.amount = parking.amount
 
 
-class ParkOneParking(Base):
+class ParkOne(Base):
     __tablename__ = "parkone"
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
@@ -203,7 +203,7 @@ class ParkOneParking(Base):
         self.external_parking_id = parking.externalParkingId
 
 
-class EasyParkParking(Base):
+class EasyPark(Base):
     __tablename__ = "easypark"
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
