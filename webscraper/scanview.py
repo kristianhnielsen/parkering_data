@@ -183,9 +183,6 @@ class BaseDataFetcher:
             # If cannot fetch all data in one request, divide it into ranges.
             # interval_days = 10 should never exceed the max payload length of 4000
             for dr in self.date_range.split(interval_days=1):
-                print(
-                    f"Fetching Scanview data from {dr.start.date()} to {dr.end.date()}"
-                )
                 payload = FetchPayload(
                     date_from=dr.start,
                     date_to=dr.end,
