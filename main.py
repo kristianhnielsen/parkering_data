@@ -218,10 +218,10 @@ def main():
             runtime_seconds=runtime,
         )
 
-        # Store data in the database
+        # Store data in the database using upsert
         with db_ops.get_db() as db:
             for table in tables:
-                db.add_all(table)
+                db_ops.upsert_records(db, table)
             db.add(log_entry)
 
         # Raise exception if all sources failed
