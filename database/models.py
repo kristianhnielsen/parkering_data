@@ -33,7 +33,7 @@ class Scanview(Base):
         super().__init__()
         self.date = order.OrderDate
         self.type = order.Name
-        self.description = order.Description
+        self.description = order.get("Description")
         self.subscription_name = order.SubscriptionName
         self.start_date = order.StartDate
         self.end_date = order.EndDate
@@ -70,11 +70,11 @@ class ScanviewLog(Base):
         self.area_name = log.AreaName
         self.area_id = int(log.AreaNo)
         self.created_date_utc = log.CreatedDateUtc
-        self.end_date_utc = log.EndDateUtc
+        self.end_date_utc = log.get("EndDateUtc")
         self.price = log.Price
         self.license_plate = log.LicensePlate
-        self.payment_start_utc = log.PaymentStartUtc
-        self.payment_end_utc = log.PaymentEndUtc
+        self.payment_start_utc = log.get("PaymentStartUtc")
+        self.payment_end_utc = log.get("PaymentEndUtc")
         self.handle = log.Handle
         self.handle_by_type = log.HandleByType
         self.handle_by = log.HandleBy
@@ -106,8 +106,8 @@ class Solvision(Base):
         self.location_id = order.id
         self.location = order.deviceName
         self.license_plate = order.plate
-        self.start_date = order.start
-        self.end_date = order.end
+        self.start_date = order.get("start")
+        self.end_date = order.get("end")
         self.price = order.amount
         self.fee = order.fee
         self.parking_time = order.parkingTime
@@ -115,9 +115,9 @@ class Solvision(Base):
         self.card = order.card
         self.card_firm = order.cardFirm
         self.card_count = order.cardCount
-        self.rate_type = order.rateType
-        self.discount_code = order.discountCode
-        self.discount_type = order.discountType
+        self.rate_type = order.get("rateType")
+        self.discount_code = order.get("discountCode")
+        self.discount_type = order.get("discountType")
 
 
 class Giantleap(Base):
@@ -148,7 +148,7 @@ class Giantleap(Base):
         self.payment_method = order.payment_method
         self.payment_card = order.payment_card
         self.payment_transaction = order.payment_transaction
-        self.note = order.note
+        self.note = order.get("note")
 
 
 class ParkPark(Base):
@@ -169,9 +169,10 @@ class ParkPark(Base):
     def __init__(self, parking: pd.Series):
         super().__init__()
         self.parking_id = parking.parking_id
-        self.external_id = parking.external_id
+        self.external_id = parking.get("external_id")
         self.name = parking.zone_name
-        self.zone_name = None if parking.zone_name == "" else parking.zone_name
+        zone_name = parking.get("zone_name")
+        self.zone_name = None if zone_name == "" else zone_name
         self.license_plate_country = parking.reg_cc.upper()
         self.license_plate = parking.reg.upper()
         self.checkin = datetime.strptime(parking.checkin, "%Y-%m-%d %H:%M:%S")
@@ -195,12 +196,12 @@ class ParkOne(Base):
     def __init__(self, parking: pd.Series):
         super().__init__()
         self.parking_start_time = parking.parkingStartTime
-        self.parking_stop_at = parking.parkingStopAt
+        self.parking_stop_at = parking.get("parkingStopAt")
         self.vehicle_reg_id = parking.vehicleRegId
         self.zone = parking.zone
         self.total_amount = parking.totalAmount
         self.parkone_parking_id = parking.parkoneParkingId
-        self.external_parking_id = parking.externalParkingId
+        self.external_parking_id = parking.get("externalParkingId")
 
 
 class EasyPark(Base):
@@ -237,17 +238,17 @@ class EasyPark(Base):
         self.start_date = datetime.strptime(parking["startDate"], "%Y-%m-%dT%H:%M:%S")
         self.end_date = datetime.strptime(parking["endDate"], "%Y-%m-%dT%H:%M:%S")
         self.license_plate = parking["licenseNumber"]
-        self.fee_exclusive_vat = parking["parkingFeeExclusiveVAT"]
-        self.fee_inclusive_vat = parking["parkingFeeInclusiveVAT"]
-        self.fee_vat = parking["parkingFeeVAT"]
+        self.fee_exclusive_vat = parking.get("parkingFeeExclusiveVAT")
+        self.fee_inclusive_vat = parking.get("parkingFeeInclusiveVAT")
+        self.fee_vat = parking.get("parkingFeeVAT")
         self.currency = parking["currency"]
         self.parking_id = parking["parkingId"]
         self.stopped = parking["stopped"]
-        self.source = parking["sourceSystem"]
-        self.subtype = parking["subType"]
-        self.spot = parking["spotNumber"]
+        self.source = parking.get("sourceSystem")
+        self.subtype = parking.get("subType")
+        self.spot = parking.get("spotNumber")
         self.area_name = parking["areaName"]
-        self.external_transaction_id = parking["externalTransactionNumber"]
+        self.external_transaction_id = parking.get("externalTransactionNumber")
 
 
 class Logs(Base):
