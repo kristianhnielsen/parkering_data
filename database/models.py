@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional
 import pandas as pd
+from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column
 from database.utils import safe_na_datetime
 
@@ -11,6 +12,15 @@ class Base(DeclarativeBase):
 
 class Scanview(Base):
     __tablename__ = "scanview"
+    __table_args__ = (
+        UniqueConstraint(
+            "date",
+            "license_plate",
+            "start_date",
+            "location_id",
+            name="uq_scanview_business_key",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
     date: Mapped[datetime]
@@ -50,6 +60,14 @@ class Scanview(Base):
 
 class ScanviewLog(Base):
     __tablename__ = "scanview_log"
+    __table_args__ = (
+        UniqueConstraint(
+            "area_id",
+            "created_date_utc",
+            "license_plate",
+            name="uq_scanview_log_business_key",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
     area_name: Mapped[str]
@@ -82,6 +100,14 @@ class ScanviewLog(Base):
 
 class Solvision(Base):
     __tablename__ = "solvision"
+    __table_args__ = (
+        UniqueConstraint(
+            "location_id",
+            "payment_time",
+            "license_plate",
+            name="uq_solvision_business_key",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
     location_id: Mapped[int]
@@ -122,6 +148,9 @@ class Solvision(Base):
 
 class Giantleap(Base):
     __tablename__ = "giantleap"
+    __table_args__ = (
+        UniqueConstraint("payment_transaction", name="uq_giantleap_business_key"),
+    )
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
     report_time: Mapped[datetime]
@@ -153,6 +182,7 @@ class Giantleap(Base):
 
 class ParkPark(Base):
     __tablename__ = "parkpark"
+    __table_args__ = (UniqueConstraint("parking_id", name="uq_parkpark_business_key"),)
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
     parking_id: Mapped[int]
@@ -183,6 +213,9 @@ class ParkPark(Base):
 
 class ParkOne(Base):
     __tablename__ = "parkone"
+    __table_args__ = (
+        UniqueConstraint("parkone_parking_id", name="uq_parkone_business_key"),
+    )
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
     parkone_parking_id: Mapped[int]
@@ -206,6 +239,7 @@ class ParkOne(Base):
 
 class EasyPark(Base):
     __tablename__ = "easypark"
+    __table_args__ = (UniqueConstraint("parking_id", name="uq_easypark_business_key"),)
 
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
     area: Mapped[int]
