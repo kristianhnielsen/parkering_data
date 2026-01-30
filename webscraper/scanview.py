@@ -220,9 +220,16 @@ class BaseDataFetcher:
 
         return data_df.drop_duplicates()
 
-    def _col_to_datetime(self, df_col: pd.Series):
+    def _col_to_datetime(self, df_col: pd.Series) -> pd.Series:
         extracted = pd.to_numeric(df_col.str.extract(r"\((\d+)\)")[0], errors="coerce")
-        return pd.to_datetime(extracted, unit="ms")
+        # The API returns timestamps with the Copenhagen offset incorrectly subtracted.
+        # We parse as UTC, convert to Copenhagen, then add the offset to correct.
+        utc_dt = pd.to_datetime(extracted, unit="ms", utc=True)
+        cph_dt = utc_dt.dt.tz_convert("Europe/Copenhagen")
+        # Add the timezone offset to correct the source data
+        offset = cph_dt.map(lambda x: x.utcoffset() if pd.notna(x) else pd.Timedelta(0))
+        corrected = (cph_dt + offset).dt.tz_localize(None)  # type: ignore
+        return corrected
 
     def _columns_containing(self, df: pd.DataFrame, keyword: str) -> list[str]:
         return [col for col in df.columns.tolist() if keyword.lower() in col.lower()]
