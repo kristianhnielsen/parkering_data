@@ -49,10 +49,18 @@ class ParkOneAPI:
                 response.raise_for_status()
                 data = response.json()
                 df = pd.concat([df, pd.DataFrame(data)], ignore_index=True)
-                df["parkingStartTime"] = pd.to_datetime(df["parkingStartTime"])
-                df["parkingStopAt"] = pd.to_datetime(df["parkingStopAt"])
             except Exception as e:
                 continue
+
+        # Convert UTC datetime columns to Copenhagen local time
+        for col in ["parkingStartTime", "parkingStopAt"]:
+            if col in df.columns:
+                df[col] = (
+                    pd.to_datetime(df[col], format="ISO8601", utc=True)
+                    .dt.tz_convert("Europe/Copenhagen")
+                    .dt.tz_localize(None)
+                )
+
         return df
 
     def _dt_ms_format(self, dt: datetime) -> str:
